@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -13,6 +14,7 @@ function App() {
         >
           count is {count}
         </button>
+        <Button>TEST</Button>
       </div>
     </>
   );
