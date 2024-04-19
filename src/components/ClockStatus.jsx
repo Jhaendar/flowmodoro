@@ -2,11 +2,11 @@ import PropTypes from "prop-types";
 import { Hourglass, Coffee } from "lucide-react";
 
 const ClockStatus = (props) => {
-  const { isWorkMode } = props;
+  const { mode } = props;
 
   return (
     <div className='clock-status flex flex-row items-center space-x-2'>
-      {isWorkMode ? (
+      {mode === "work" ? (
         <>
           <Hourglass className='' />
           <p className='align-middle font-sans text-2xl'>WORK TIME</p>
@@ -24,7 +24,7 @@ const ClockStatus = (props) => {
 };
 
 ClockStatus.propTypes = {
-  isWorkMode: PropTypes.bool.isRequired,
+  mode: PropTypes.string.isRequired,
 };
 
 export default ClockStatus;
