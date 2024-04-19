@@ -90,7 +90,7 @@ const Stopwatch = () => {
     // work going to break
     if (mode === "work") {
       setMode("break");
-      let breakFactor = 0.5;
+      let breakFactor = 0.2;
       if (breakLength === "long") {
         breakFactor = 1;
       }
