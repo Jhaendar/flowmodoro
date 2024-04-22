@@ -2,9 +2,7 @@ import PropTypes from "prop-types";
 import { TimeDuration } from "@/lib/timer";
 
 const ClockText = ({ time, mode }) => {
-  let elapsed = time.getElapsed();
   let { hours, minutes, seconds } = time.getTimeComponents();
-  console.log(elapsed / 1000, time.startTime, time.endTime);
 
   let breakStyle = "text-green-500";
 
