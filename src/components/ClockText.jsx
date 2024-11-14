@@ -3,7 +3,6 @@ import { TimeDuration } from "@/lib/timer";
 
 const ClockText = ({ time, mode }) => {
   let { hours, minutes, seconds } = time.getTimeComponents();
-
   let breakStyle = "text-green-500";
 
   return (

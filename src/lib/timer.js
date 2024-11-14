@@ -32,11 +32,10 @@ class TimeDuration {
   }
 
   getTimeComponents() {
-    const elapsed = this.getElapsed();
-    const hours = Math.floor(elapsed / 3600000);
-    const minutes = Math.floor((elapsed % 3600000) / 60000);
-    const seconds = Math.floor((elapsed % 60000) / 1000);
-
+    const diff = this.getElapsed();
+    const seconds = Math.floor(diff / 1000) % 60;
+    const minutes = Math.floor(diff / (1000 * 60)) % 60;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
     return { hours, minutes, seconds };
   }
 
