@@ -8,128 +8,88 @@ import useSound from "use-sound";
 import chimeURL from "@/assets/Sounds/chime.mp3";
 import changeModeURL from "@/assets/Sounds/changemode.mp3";
 
+// redux
+import { useDispatch, useSelector } from "react-redux";
+import {
+  resetTimer,
+  startTimer,
+  resumeTimer,
+  pauseTimer,
+  timerRefresh,
+  changeToWorkTimer,
+  changeToBreakTimer,
+} from "@/features/timer/timerSlice";
+import { current } from "@reduxjs/toolkit";
+
 const Stopwatch = () => {
-  const [time, setTime] = useState(() => new TimeDuration());
-  const [startTime, setStartTime] = useState(0);
-  const [breakEndTime, setBreakEndTime] = useState(0);
-  const [breakDuration, setBreakDuration] = useState(0);
-  const [pauseStartTime, setPauseStartTime] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isStarted, setIsStarted] = useState(false);
-  const [mode, setMode] = useState("work");
+  const workStartTime = useSelector((state) => state.timer.workStartTime);
+  const workEndTime = useSelector((state) => state.timer.workEndTime);
+  const breakStartTime = useSelector((state) => state.timer.breakStartTime);
+  const breakEndTime = useSelector((state) => state.timer.breakEndTime);
+  const mode = useSelector((state) => state.timer.mode);
+  const status = useSelector((state) => state.timer.status);
+  const dispatch = useDispatch();
 
-  const [playChangeMode] = useSound(changeModeURL, { volume: 0.5 });
-  const [playChime] = useSound(chimeURL, { volume: 0.5 });
-
-  useEffect(() => {
-    if (!isRunning) {
-      return;
-    }
+  function getTime() {
     if (mode === "work") {
-      const interval = setInterval(() => {
-        setTime(new TimeDuration(startTime, Date.now()));
-      }, 500);
-
-      const chimeInterval = setInterval(
-        () => {
-          playChime();
-        },
-        1000 * 60 * 30
-      );
-
-      return () => {
-        clearInterval(interval);
-        clearInterval(chimeInterval);
-      };
+      return new TimeDuration(workStartTime, workEndTime);
     }
     if (mode === "break") {
-      const interval = setInterval(() => {
-        setTime(new TimeDuration(Date.now(), breakEndTime));
-      }, 500);
-      return () => {
-        clearInterval(interval);
-      };
+      return new TimeDuration(breakStartTime, breakEndTime);
     }
-  }, [mode, isRunning, startTime, breakEndTime, playChime]);
-
-  useEffect(() => {
-    if (mode === "break" && time.getElapsed() <= 600) {
-      setMode("work");
-      setStartTime(Date.now());
-      setBreakDuration(0);
-      playChangeMode();
-    }
-  }, [time, mode, playChangeMode]);
-
+  }
   function handlePausePlay() {
-    if (!isStarted) {
-      setStartTime(Date.now());
-      setIsStarted(true);
-      setIsRunning(true);
-      return;
-    }
-
-    // Changing to Pause
-    if (isRunning) {
-      setIsRunning(false);
-      setPauseStartTime(Date.now());
-    }
-
-    //Changing to Play
-    if (!isRunning) {
-      setIsRunning(true);
-
-      if (mode === "work") {
-        setStartTime((prev) => Date.now() - (pauseStartTime - prev));
-      }
-
-      if (mode === "break") {
-        setBreakEndTime((prev) => prev + (Date.now() - pauseStartTime));
-      }
-
-      setPauseStartTime(0);
+    const currentTime = performance.now();
+    if (status === "idle") {
+      dispatch(
+        startTimer({
+          workStartTime: currentTime,
+          workEndTime: currentTime,
+        })
+      );
+      dispatch(timerRefresh());
+    } else if (status === "running") {
+      dispatch(pauseTimer({ pauseStartTime: currentTime }));
+    } else if (status === "paused") {
+      dispatch(resumeTimer({ pauseEndTime: currentTime }));
+      dispatch(timerRefresh());
     }
   }
 
   function handleReset() {
-    setIsRunning(false);
-    setIsStarted(false);
-    setBreakDuration(0);
-    setMode("work");
-    setTime(new TimeDuration());
+    dispatch(resetTimer());
   }
 
-  function handleChangeMode(breakLength = "short") {
-    // work going to break
-    if (mode === "work") {
-      setMode("break");
-      let breakFactor = 0.2;
-      if (breakLength === "long") {
-        breakFactor = 1;
-      }
-
-      const newbreakEndTime =
-        Date.now() + time.getElapsed() * breakFactor + breakDuration;
-      setBreakEndTime(newbreakEndTime);
-      setTime(new TimeDuration(Date.now(), newbreakEndTime));
-    }
-
-    // break going to work
-    if (mode === "break") {
-      setMode("work");
-      if (time.getElapsed() > 0) {
-        setBreakDuration(time.getElapsed());
-      }
-      setStartTime(Date.now());
-      setTime(new TimeDuration());
+  function handleChangeMode(newMode) {
+    const currentTime = performance.now();
+    if (newMode === "work") {
+      dispatch(
+        changeToWorkTimer({
+          workStartTime: currentTime,
+          workEndTim: currentTime,
+        })
+      );
+    } else if (newMode === "break") {
+      dispatch(
+        changeToBreakTimer({ breakStartTime: currentTime, breakMode: "break" })
+      );
+    } else if (newMode === "long") {
+      dispatch(
+        changeToBreakTimer({
+          breakStartTime: currentTime,
+          breakMode: "long",
+        })
+      );
     }
   }
+
+  const [playChangeMode] = useSound(changeModeURL, { volume: 0.5 });
+  const [playChime] = useSound(chimeURL, { volume: 0.5 });
 
   return (
     <div className='clock m-auto flex flex-col items-center justify-center'>
       <ClockStatus mode={mode} />
-      <ClockText time={time} mode={mode} />
-      {/* <h2>{breakDuration / 1000}</h2> */}
+      <ClockText time={getTime()} mode={mode} />
 
       <div className='clock-controls space-x-3 py-5'>
         <Button
@@ -139,7 +99,7 @@ const Stopwatch = () => {
           size='icon'
           variant='outline'
         >
-          {!isRunning ? <Play /> : <Pause />}
+          {status != "running" ? <Play /> : <Pause />}
         </Button>
 
         <Button
@@ -155,20 +115,18 @@ const Stopwatch = () => {
         <Button
           id='break-button'
           className='h-12 w-12'
-          disabled={
-            mode === "work" &&
-            breakDuration + time.getElapsed() < 1000 * 60 * 20
-          }
-          onClick={handleChangeMode}
+          disabled={mode === "break"}
+          onClick={() => handleChangeMode(mode === "break" ? "work" : "break")}
           size='icon'
         >
           <Coffee />
         </Button>
 
         <Button
-          disabled={breakDuration + time.getElapsed() < 1000 * 60 * 30}
+          // disabled={breakDuration + time.getElapsed() < 1000 * 60 * 30}
           size='icon'
           className='h-12 w-12'
+          disabled={mode === "break"}
           onClick={() => handleChangeMode("long")}
         >
           <Trees />
