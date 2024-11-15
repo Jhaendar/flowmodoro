@@ -1,11 +1,12 @@
 import Stopwatch from "@/components/Stopwatch";
+import TodoListContainer from "./components/TodoListContainer";
 
 const App = () => {
   return (
     <>
-      <div className=' space h-screen w-screen flex-auto flex-col justify-center'>
-        <h1 className=' py-5 text-center text-3xl'>FLOWMODORO</h1>
+      <div className='mt-5 flex w-screen flex-col items-center gap-2'>
         <Stopwatch />
+        <TodoListContainer />
       </div>
     </>
   );

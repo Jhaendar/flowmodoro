@@ -5,7 +5,7 @@ const ClockStatus = (props) => {
   const { mode } = props;
 
   return (
-    <div className='clock-status flex flex-row items-center space-x-2'>
+    <div className='clock-status flex flex-row items-center justify-center'>
       {mode === "work" ? (
         <>
           <Hourglass className='' />
