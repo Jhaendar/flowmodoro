@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { Satellite } from "lucide-react";
 
 const initialState = {
   mode: "work", // work | break | long-break
@@ -20,7 +19,12 @@ export const timerRefresh = createAsyncThunk(
 
     const updateTimer = () => {
       const { timer } = getState();
-      const { mode, workStartTime, breakEndTime } = timer;
+      const { mode, workStartTime, breakEndTime, status } = timer;
+
+      if (status === "idle") {
+        dispatch(updateWorkTimer({ workStartTime: 0, workEndTime: 0 }));
+        return;
+      }
 
       if (mode === "work") {
         dispatch(
@@ -87,6 +91,7 @@ export const timerSlice = createSlice({
     },
     resetTimer: (state) => {
       state.mode = "work";
+      state.status = "idle";
       state.workStartTime = 0;
       state.workEndTime = 0;
       state.breakStartTime = 0;
@@ -94,7 +99,6 @@ export const timerSlice = createSlice({
       state.bankedBreakTime = 0;
       state.pauseStartTime = 0;
       state.pauseEndTime = 0;
-      state.status = "idle";
     },
     startTimer: (state, action) => {
       // all preparation when starting timer for the first time

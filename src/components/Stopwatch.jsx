@@ -8,6 +8,15 @@ import useSound from "use-sound";
 import chimeURL from "@/assets/Sounds/chime.mp3";
 import changeModeURL from "@/assets/Sounds/changemode.mp3";
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 // redux
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -18,8 +27,10 @@ import {
   timerRefresh,
   changeToWorkTimer,
   changeToBreakTimer,
+  updateWorkTimer,
+  setMode,
+  setStatus,
 } from "@/features/timer/timerSlice";
-import { current } from "@reduxjs/toolkit";
 
 const Stopwatch = () => {
   const workStartTime = useSelector((state) => state.timer.workStartTime);
@@ -87,52 +98,59 @@ const Stopwatch = () => {
   const [playChime] = useSound(chimeURL, { volume: 0.5 });
 
   return (
-    <div className='clock m-auto flex flex-col items-center justify-center'>
-      <ClockStatus mode={mode} />
-      <ClockText time={getTime()} mode={mode} />
+    <Card className='clock m-auto flex flex-col items-center justify-center'>
+      <CardHeader>
+        <CardTitle className='text-center text-3xl'>FLOWMODORO</CardTitle>
+      </CardHeader>
 
-      <div className='clock-controls space-x-3 py-5'>
-        <Button
-          id='play-button'
-          className='h-12 w-12'
-          onClick={handlePausePlay}
-          size='icon'
-          variant='outline'
-        >
-          {status != "running" ? <Play /> : <Pause />}
-        </Button>
+      <CardContent>
+        <ClockStatus mode={mode} />
+        <ClockText time={getTime()} mode={mode} />
 
-        <Button
-          id='reset-button'
-          className='h-12 w-12'
-          onClick={handleReset}
-          size='icon'
-          variant='outline'
-        >
-          <TimerReset />
-        </Button>
+        <div className='clock-controls space-x-3 py-5'>
+          <Button
+            id='play-button'
+            className='h-12 w-12'
+            onClick={handlePausePlay}
+            size='icon'
+            variant='outline'
+          >
+            {status != "running" ? <Play /> : <Pause />}
+          </Button>
 
-        <Button
-          id='break-button'
-          className='h-12 w-12'
-          disabled={mode === "break"}
-          onClick={() => handleChangeMode(mode === "break" ? "work" : "break")}
-          size='icon'
-        >
-          <Coffee />
-        </Button>
+          <Button
+            id='reset-button'
+            className='h-12 w-12'
+            onClick={handleReset}
+            size='icon'
+            variant='outline'
+          >
+            <TimerReset />
+          </Button>
 
-        <Button
-          // disabled={breakDuration + time.getElapsed() < 1000 * 60 * 30}
-          size='icon'
-          className='h-12 w-12'
-          disabled={mode === "break"}
-          onClick={() => handleChangeMode("long")}
-        >
-          <Trees />
-        </Button>
-      </div>
-    </div>
+          <Button
+            id='break-button'
+            className='h-12 w-12'
+            disabled={workEndTime - workStartTime < 5000 || mode === "break"}
+            onClick={() =>
+              handleChangeMode(mode === "break" ? "work" : "break")
+            }
+            size='icon'
+          >
+            <Coffee />
+          </Button>
+
+          <Button
+            disabled={workEndTime - workStartTime < 5000 || mode === "break"}
+            size='icon'
+            className='h-12 w-12'
+            onClick={() => handleChangeMode("long")}
+          >
+            <Trees />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
