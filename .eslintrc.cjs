@@ -1,8 +1,11 @@
+const path = require("path");
+
 module.exports = {
   root: true,
   env: { browser: true, es2020: true },
   extends: [
     "eslint:recommended",
+    "plugin:import/recommended",
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
     "plugin:react-hooks/recommended",
@@ -15,7 +18,19 @@ module.exports = {
       jsx: true,
     },
   },
-  settings: { react: { version: "18.2" } },
+  settings: {
+    react: { version: "18.2" },
+    "import/resolver": {
+      node: {
+        paths: ["src"],
+        extensions: [".js", ".jsx", ".ts", ".d.ts", ".tsx"],
+      },
+      alias: {
+        map: [["@", path.resolve(__dirname, "./src")]],
+        extensions: [".js", ".jsx", ".ts", ".d.ts", ".tsx"],
+      },
+    },
+  },
   plugins: ["react-refresh"],
   rules: {
     "react/jsx-no-target-blank": "off",
@@ -23,5 +38,7 @@ module.exports = {
       "warn",
       { allowConstantExport: true },
     ],
+    "import/no-unresolved": ["error", { commonjs: true, amd: true }],
+    "import/no-dynamic-require": "off",
   },
 };
