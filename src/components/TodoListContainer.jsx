@@ -3,8 +3,6 @@ import { useState } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -19,8 +17,6 @@ import { addTodo } from "@/features/todos/todosSlice";
 
 function TodoListContainer() {
   const todos = useSelector((state) => state.todos.todos);
-  const workStartTime = useSelector((state) => state.timer.workStartTime);
-
   const [newTodo, setNewTodo] = useState("");
   const dispatch = useDispatch();
 
@@ -44,7 +40,7 @@ function TodoListContainer() {
             className='mr-2 h-8 flex-grow bg-gray-700 text-sm text-white'
             value={newTodo}
             onChange={(e) => setNewTodo(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleAddTodo()}
+            onKeyDown={(e) => e.key === "Enter" && handleAddTodo()}
           />
           <Button
             className='h-8 w-8 bg-purple-600 p-0 hover:bg-purple-700'
