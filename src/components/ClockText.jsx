@@ -1,5 +1,6 @@
 import { TimeDuration } from "@/lib/timer";
 import { useSelector } from "react-redux";
+import { TIMER_MODE } from "@/lib/constants";
 
 const ClockText = () => {
   const mode = useSelector((state) => state.timer.mode);
@@ -9,10 +10,10 @@ const ClockText = () => {
   const breakEndTime = useSelector((state) => state.timer.breakEndTime);
 
   function getTime() {
-    if (mode === "work") {
+    if (mode === TIMER_MODE.WORK) {
       return new TimeDuration(workStartTime, workEndTime);
     }
-    if (mode === "break") {
+    if (mode === TIMER_MODE.BREAK) {
       return new TimeDuration(breakStartTime, breakEndTime);
     }
   }
@@ -20,11 +21,9 @@ const ClockText = () => {
   const time = getTime();
   let { hours, minutes, seconds } = time.getTimeComponents();
 
-  let breakStyle = "text-green-500";
-
   return (
     <p
-      className={`text-center font-mono text-5xl ${mode === "break" ? breakStyle : ""}`}
+      className={`text-center font-mono text-5xl ${mode === TIMER_MODE.BREAK ? "text-green-500" : ""}`}
     >
       {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}:
       {String(seconds).padStart(2, "0")}

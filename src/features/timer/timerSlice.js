@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { TIMER_MODE, TIMER_STATUS, SHORT_BREAK_FACTOR, LONG_BREAK_FACTOR } from "@/lib/constants";
 
 const initialState = {
-  mode: "work", // work | break | long-break
+  mode: TIMER_MODE.WORK,
   workStartTime: 0,
   workEndTime: 0,
   breakStartTime: 0,
@@ -9,7 +10,7 @@ const initialState = {
   bankedBreakTime: 0,
   pauseStartTime: 0,
   pauseEndTime: 0,
-  status: "idle", // 'idle' | 'running' | 'paused'
+  status: TIMER_STATUS.IDLE,
 };
 
 export const timerRefresh = createAsyncThunk(
@@ -21,21 +22,21 @@ export const timerRefresh = createAsyncThunk(
       const { timer } = getState();
       const { mode, workStartTime, breakEndTime, status } = timer;
 
-      if (status === "idle") {
+      if (status === TIMER_STATUS.IDLE) {
         dispatch(updateWorkTimer({ workStartTime: 0, workEndTime: 0 }));
         return;
       }
 
-      if (mode === "work") {
+      if (mode === TIMER_MODE.WORK) {
         dispatch(
           updateWorkTimer({ workStartTime, workEndTime: performance.now() })
         );
-      } else if (mode === "break") {
+      } else if (mode === TIMER_MODE.BREAK) {
         let newBreakStartTime = performance.now();
 
         if (breakEndTime - newBreakStartTime < 0) {
-          //switch mode
-          dispatch(setMode("work"));
+          // Switch mode back to work
+          dispatch(setMode(TIMER_MODE.WORK));
           dispatch(
             updateWorkTimer({
               workStartTime: performance.now(),
@@ -52,7 +53,7 @@ export const timerRefresh = createAsyncThunk(
         }
       }
 
-      if (getState().timer.status === "running") {
+      if (getState().timer.status === TIMER_STATUS.RUNNING) {
         requestAnimationFrame(updateTimer);
       }
     };
@@ -90,8 +91,8 @@ export const timerSlice = createSlice({
       state.status = action.payload;
     },
     resetTimer: (state) => {
-      state.mode = "work";
-      state.status = "idle";
+      state.mode = TIMER_MODE.WORK;
+      state.status = TIMER_STATUS.IDLE;
       state.workStartTime = 0;
       state.workEndTime = 0;
       state.breakStartTime = 0;
@@ -103,37 +104,37 @@ export const timerSlice = createSlice({
     startTimer: (state, action) => {
       // all preparation when starting timer for the first time
       const { workStartTime, workEndTime } = action.payload;
-      state.status = "running";
+      state.status = TIMER_STATUS.RUNNING;
       state.workEndTime = workStartTime;
       state.workStartTime = workEndTime;
     },
     pauseTimer: (state, action) => {
       // all preparation when pausing timer
       const { pauseStartTime } = action.payload;
-      state.status = "paused";
+      state.status = TIMER_STATUS.PAUSED;
       state.pauseStartTime = pauseStartTime;
     },
     resumeTimer: (state, action) => {
       // all preparation when resuming timer
       const { pauseEndTime } = action.payload;
 
-      state.status = "running";
+      state.status = TIMER_STATUS.RUNNING;
       const pauseDuration = pauseEndTime - state.pauseStartTime;
 
-      if (state.mode === "work") {
+      if (state.mode === TIMER_MODE.WORK) {
         state.workEndTime += pauseDuration;
         state.workStartTime += pauseDuration;
-      } else if (state.mode === "break") {
+      } else if (state.mode === TIMER_MODE.BREAK) {
         state.breakEndTime += pauseDuration;
         state.breakStartTime += pauseDuration;
       }
     },
     changeToBreakTimer(state, action) {
       const { breakStartTime, breakMode } = action.payload;
-      state.mode = "break";
+      state.mode = TIMER_MODE.BREAK;
 
       state.breakStartTime = breakStartTime;
-      const breakFactor = breakMode === "long" ? 1 : 0.25;
+      const breakFactor = breakMode === "long" ? LONG_BREAK_FACTOR : SHORT_BREAK_FACTOR;
       const currentBreakDuration =
         (state.workEndTime - state.workStartTime) * breakFactor;
       state.breakEndTime =
@@ -141,7 +142,7 @@ export const timerSlice = createSlice({
     },
     changeToWorkTimer(state, action) {
       const { workStartTime, workEndTime } = action.payload;
-      state.mode = "work";
+      state.mode = TIMER_MODE.WORK;
       state.bankedBreakTime += state.breakEndTime - state.breakStartTime;
 
       state.workStartTime = workStartTime;
