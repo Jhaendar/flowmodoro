@@ -30,7 +30,7 @@ function TodoListContainer() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tasks</CardTitle>
+        <CardTitle className='text-center text-3xl'>TASKS</CardTitle>
       </CardHeader>
       <CardContent>
         <div className='mb-2 flex'>

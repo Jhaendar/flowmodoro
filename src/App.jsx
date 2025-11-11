@@ -1,11 +1,22 @@
 import Stopwatch from "@/components/Stopwatch";
 import TodoListContainer from "./components/TodoListContainer";
+import { useSelector } from "react-redux";
+import { TIMER_MODE } from "@/lib/constants";
 
 const App = () => {
+  const mode = useSelector((state) => state.timer.mode);
+  const isBreakTime = mode === TIMER_MODE.BREAK;
+
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
+    <div className={`relative min-h-screen w-full overflow-hidden transition-all duration-1000 ${
+      isBreakTime
+        ? "bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900"
+        : "bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900"
+    }`}>
       {/* Grid Background */}
-      <div className="pointer-events-none absolute inset-0 bg-grid-pattern opacity-20" />
+      <div className={`pointer-events-none absolute inset-0 opacity-20 transition-all duration-1000 ${
+        isBreakTime ? "bg-grid-pattern-green" : "bg-grid-pattern"
+      }`} />
 
       {/* Pixel Art Mascots */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
